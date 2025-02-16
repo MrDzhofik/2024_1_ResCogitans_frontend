@@ -14,28 +14,28 @@ import Map from '@components/Map/Map';
 
 
 class SightPage extends Base {
-  id : number;
+  id: number;
 
-  sight : Sight;
+  sight: Sight;
 
-  formErrorHandler : AuthorizationForm;
+  formErrorHandler: AuthorizationForm;
 
-  constructor(parent : HTMLElement) {
+  constructor(parent: HTMLElement) {
     super(parent, template);
     this.id = parseInt(window.location.pathname.split('/')[2], 10);
     this.formErrorHandler = new AuthorizationForm();
   }
 
-  validateFeedback(field : HTMLTextAreaElement, parent : HTMLElement) : boolean {
-    
+  validateFeedback(field: HTMLTextAreaElement, parent: HTMLElement): boolean {
+
     if (field.value.length < 5) {
       this.formErrorHandler.renderError(parent, 'Отзыв не может быть короче 5 символов');
       return false;
     }
     return true;
   }
-  
-  renderReviews(response : unknown) {
+
+  renderReviews(response: unknown) {
     const reviewsDiv = document.querySelector('.sight-reviews') as HTMLDivElement;
     const userReviewDiv = document.querySelector('#user-review') as HTMLDivElement;
 
@@ -45,7 +45,7 @@ class SightPage extends Base {
       if (this.userData === null) {
         userReviewDiv.remove();
         new Button(reviewsDiv, {
-          className : 'button-primary', id : 'button-login-redirect', label : 'Войти', url : '/login', 
+          className: 'button-primary', id: 'button-login-redirect', label: 'Войти', url: '/login',
         }).render();
       }
     } else {
@@ -56,7 +56,7 @@ class SightPage extends Base {
         }
         new Review(reviewsDiv, this.id, review, (this.userData && review.userID === this.userData.userID)).render();
       });
-    }  
+    }
   }
 
   renderSight() {
@@ -78,9 +78,9 @@ class SightPage extends Base {
     const adress = document.getElementById('sight-adress') as HTMLParagraphElement;
 
     const showMapButton = this.createElement('button', {
-      class : 'button button-primary', id : 'button-showmap', 
+      class: 'button button-primary', id: 'button-showmap',
     }, 'Показать на карте', {
-      parent : adress, position : 'after', 
+      parent: adress, position: 'after',
     });
 
     const content = document.getElementById('content') as HTMLDivElement;
@@ -118,23 +118,23 @@ class SightPage extends Base {
       this.renderSight();
 
       document.body.classList.remove('auth-background');
-   
+
       const ratingDiv = document.querySelector('.rating') as HTMLDivElement;
-      new Stars(ratingDiv, this.sight.rating).render(); 
+      new Stars(ratingDiv, this.sight.rating).render();
 
 
       const deleteDialog = document.querySelector('.delete-dialog') as HTMLDialogElement;
       const editDialog = document.querySelector('.edit-dialog') as HTMLDialogElement;
 
       const editStarsContainer = editDialog.querySelector('#edit-stars-container') as HTMLElement;
-  
+
       const submitButton = document.getElementById('review-submit') as HTMLButtonElement;
       const reviewForm = document.querySelector('#review-form') as HTMLFormElement;
       const reviewFormTextArea = reviewForm.querySelector('.review-textarea') as HTMLTextAreaElement;
       const starsContainer = document.getElementById('stars-container') as HTMLElement;
       const stars = new Stars(starsContainer, 5, true);
       stars.render();
-  
+
       const editStars = new Stars(editStarsContainer, 5, true);
       editStars.render();
 
@@ -150,7 +150,7 @@ class SightPage extends Base {
       const deleteModalButton = deleteDialog.querySelector('.button-danger') as HTMLButtonElement;
       const editModalButton = editDialog.querySelector('.button-primary') as HTMLButtonElement;
 
-      submitButton?.addEventListener('click', (e : Event) => {
+      submitButton?.addEventListener('click', (e: Event) => {
         e.preventDefault();
 
         if (this.userData === null) {
@@ -161,7 +161,7 @@ class SightPage extends Base {
         const userID = this.userData.userID;
         const rating = stars.rating;
         const requestBody = {
-          userID, rating, feedback : feedback.value, 
+          userID, rating, feedback: feedback.value,
         };
 
         if (!this.validateFeedback(feedback, reviewForm)) {
@@ -175,14 +175,14 @@ class SightPage extends Base {
           });
         }
       });
-   
-      cancelButtons.forEach((button : HTMLButtonElement) => button.addEventListener('click', function () {
+
+      cancelButtons.forEach((button: HTMLButtonElement) => button.addEventListener('click', function () {
         document.querySelector('.staged-delete')?.classList.remove('staged-delete');
         deleteDialog.close();
         editDialog.close();
       }));
 
-      deleteModalButton?.addEventListener('click', (e : Event) => {
+      deleteModalButton?.addEventListener('click', (e: Event) => {
         e.preventDefault();
         const commentID = document.querySelector('.staged-delete')?.id.split('-')[1];
         post(ROUTES.sights.deleteComment(this.id, commentID), {}).then((responseDeleteReview) => {
@@ -195,7 +195,7 @@ class SightPage extends Base {
         });
       });
 
-      editModalButton?.addEventListener('click', (e : Event) => {
+      editModalButton?.addEventListener('click', (e: Event) => {
         e.preventDefault();
         const commentID = document.querySelector('.staged-delete')?.id.split('-')[1];
         const feedbackField = editDialog.querySelector('#editTextArea') as HTMLTextAreaElement;
@@ -207,7 +207,7 @@ class SightPage extends Base {
         } else {
           const rating = editStars.rating;
           const body = {
-            rating : rating, feedback : feedback, userID : userID, 
+            rating: rating, feedback: feedback, userID: userID,
           };
 
           this.formErrorHandler.clearError(editDialog);
@@ -224,7 +224,7 @@ class SightPage extends Base {
       return;
     });
 
-  }   
+  }
 }
- 
+
 export default SightPage;

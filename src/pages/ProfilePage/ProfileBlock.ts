@@ -4,21 +4,21 @@ import template from '@templates/ProfileBlock.hbs';
 
 class ProfileBlock extends Base {
 
-  profileData : unknown; 
+  profileData: unknown;
 
-  isOwn : boolean;
+  isOwn: boolean;
 
-  constructor(parent : HTMLElement, profileData : unknown) {
+  constructor(parent: HTMLElement, profileData: unknown) {
     super(parent, template);
 
     this.profileData = profileData;
-    
-    this.isOwn = (this.userData === null) ? false : (this.profileData.userID === this.userData.userID); 
-    
+
+    this.isOwn = (this.userData === null) ? false : (this.profileData.userID === this.userData.userID);
+
     if (profileData.avatar === '') {
       this.profileData.avatar = '/static/placeholder.jpg';
     } else {
-      this.profileData.avatar = profileData.avatar.replace(/.*\/public\//, '/public/');
+      this.profileData.avatar = '/public/avatar/' + profileData.avatar;
     }
   }
 
@@ -26,7 +26,7 @@ class ProfileBlock extends Base {
     this.preRender();
 
     const profileEditForm = document.querySelector('dialog') as HTMLDialogElement;
-    
+
     const profileSettingsButton = document.querySelector('#profile-edit-button') as HTMLButtonElement;
     profileSettingsButton?.addEventListener('click', () => {
       profileEditForm.showModal();
