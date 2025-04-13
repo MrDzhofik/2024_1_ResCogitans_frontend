@@ -8,22 +8,22 @@ import { ENV_CONFIG } from '../../envConfig';
 * @param {string} url - URL для запроса данных.
 * @returns {Promise<void>}
 */
-export async function get( endpoint : string, body? : unknown) : Promise<unknown> {
+export async function get(endpoint: string, body?: unknown): Promise<unknown> {
   const response = await fetch(`${ENV_CONFIG.API_URL}/api/${endpoint}`, {
-    body : JSON.stringify(body),
+    body: JSON.stringify(body),
   });
   const responseData = await response.json();
   return {
-    data: responseData, status: response.status, 
+    data: responseData, status: response.status,
   };
 }
 
 
-export async function post(endpoint : string, body? : unknown): Promise<unknown> {
+export async function post(endpoint: string, body?: unknown): Promise<unknown> {
   const response = await fetch(`${ENV_CONFIG.API_URL}/api/${endpoint}`, {
     method: 'POST',
     headers: {
-      'Content-Type': 'application/json', 
+      'Content-Type': 'application/json',
     },
     credentials: 'include',
     body: JSON.stringify(body),
@@ -31,13 +31,14 @@ export async function post(endpoint : string, body? : unknown): Promise<unknown>
 
   const responseData = await response.json();
   return {
-    data: responseData, status: response.status, 
+    data: responseData, status: response.status,
   };
 }
 
 
+
 export default {
-  get, post, 
+  get, post,
 };
 
 

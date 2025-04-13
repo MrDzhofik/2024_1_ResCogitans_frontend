@@ -2,7 +2,7 @@ import Base from '@components/Base/Base';
 import Header from '@components/Header/Header';
 import { Journey, Sight, WithResponse } from 'src/types/api';
 import Place from '@pages/PlacesPage/Placelist/Place/Place';
-import { post } from '@api/base';
+import { post, showroute } from '@api/base';
 import { getTrip } from '@api/journey';
 import { getSights } from '@api/sight';
 import { router } from '@router/router';
@@ -29,7 +29,7 @@ class JourneyPage extends Base {
 
   type?: string;
 
-  constructor(parent : HTMLElement, params : any) {
+  constructor(parent: HTMLElement, params: any) {
     super(parent, template);
 
     this.IDs = [];
@@ -56,15 +56,15 @@ class JourneyPage extends Base {
 
     const currentCard = document.querySelector(`#card-${id}`) as HTMLDivElement;
     const deleteButton = this.createElement('button', {
-      class: 'button button-primary top-right close-icon', 
+      class: 'button button-primary top-right close-icon',
     }, '', {
-      parent : currentCard, 
+      parent: currentCard,
     });
 
     deleteButton.addEventListener('click', () => {
       this.removeCard(id);
     });
-  
+
   }
 
   removeCard(id: string) {
@@ -174,14 +174,14 @@ class JourneyPage extends Base {
           const nameInput = document.querySelector('input') as HTMLInputElement;
           const descriptionInput = document.querySelector('textarea') as HTMLTextAreaElement;
           const body = {
-            userID: userID, name: nameInput.value, description: descriptionInput.value, 
+            userID: userID, name: nameInput.value, description: descriptionInput.value,
           };
 
           post('trip/create', body).then((response) => {
             if (response.status === 200) {
               this.tripID = response.data.id;
               post(`trip/${this.tripID}/sight/add`, {
-                sightIDs: this.IDs, 
+                sightIDs: this.IDs,
               }).then(() => {
                 this.type = 'view';
                 router.go(ROUTES.journey.view(this.tripID));
@@ -265,6 +265,59 @@ class JourneyPage extends Base {
               editJourneyButton?.addEventListener('click', () => {
                 router.go(ROUTES.journey.edit(this.tripID));
               });
+              const buildRouteButton = document.getElementById('button-show-route') as HTMLButtonElement;
+
+              if (buildRouteButton) {
+                buildRouteButton.addEventListener('click', async () => {
+                  try {
+                    // 1. Получаем массив ID достопримечательностей
+                    const sightIds = this.IDs;
+
+                    if (sightIds.length < 2) {
+                      alert('Для маршрута нужно минимум 2 точки!');
+                      return;
+                    }
+
+                    // 2. Формируем данные в нужном формате
+                    const formData = new URLSearchParams();
+
+                    // 3. Добавляем основные точки
+                    formData.append('start_point', String(sightIds[0]));
+                    formData.append('end_point', String(sightIds[sightIds.length - 1]));
+
+                    // 4. Добавляем промежуточные точки
+                    sightIds.slice(1, -1).forEach((id, index) => {
+                      formData.append(`dynamic_field_${index + 1}`, String(id));
+                    });
+
+
+                    // 5. Создаем скрытую форму
+                    const form = document.createElement('form');
+                    form.method = 'POST';
+                    form.action = 'http://localhost:8000/showroute';
+                    form.style.display = 'none';
+
+                    // 6. Преобразуем URLSearchParams в скрытые поля формы
+                    for (const [key, value] of formData.entries()) {
+                      const input = document.createElement('input');
+                      input.type = 'hidden';
+                      input.name = key;
+                      input.value = value;
+                      form.appendChild(input);
+                    }
+
+                    // 7. Отправляем форму
+                    document.body.appendChild(form);
+                    form.submit();
+
+
+                  } catch (error) {
+                    console.error('Ошибка при построении маршрута:', error);
+                    alert('Ошибка: ' + error.message);
+                  }
+                });
+              }
+
             } else if (this.type === 'edit') {
               editForm.addEventListener('submit', (e: Event) => {
 
@@ -281,7 +334,7 @@ class JourneyPage extends Base {
                 const nameInput = document.querySelector('input') as HTMLInputElement;
                 const descriptionInput = document.querySelector('textarea') as HTMLTextAreaElement;
                 const body = {
-                  userID: userID, name: nameInput.value, description: descriptionInput.value, sightIDs: this.IDs, 
+                  userID: userID, name: nameInput.value, description: descriptionInput.value, sightIDs: this.IDs,
                 };
 
                 post(`trip/${this.journey.id}/sight/add`, body).then((createJourneyResponse) => {
